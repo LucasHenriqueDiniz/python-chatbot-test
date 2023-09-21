@@ -11,18 +11,24 @@ def chat_client(conn, addr):
             print("Waiting for client message...")
             message = conn.recv(2048).decode("utf-8")
             if message:
-                print(f"<{addr}>: {message}")
-                conn.send("200 OK Message received.\n".encode("utf-8"))  # Adicione '\n' ao final da mensagem
+                if message == "goodbye":
+                    print("Server closed the connection.")
+                    client_connected = False
+                else:
+                    print(f"<{addr}>: {message}")
             else:
                 client_connected = False
     except Exception as ex:
         print("ERROR: ", ex)
     conn.close()
-
+    
 def user_input_handler(server):
     while True:
-        message = input()  # Aguarde a entrada do usuário
-        server.send(message.encode("utf-8"))  # Envie a mensagem ao servidor
+        message = input()
+        if message == "@sair":
+            server.send(message.encode("utf-8"))
+            break
+        server.send(message.encode("utf-8"))
 
 ip_address = "127.0.0.1"
 port = int(sys.argv[1]) if len(sys.argv) > 1 else 19000
